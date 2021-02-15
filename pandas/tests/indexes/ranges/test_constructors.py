@@ -12,13 +12,13 @@ class TestRangeIndexConstructors:
     @pytest.mark.parametrize(
         "args, kwargs, start, stop, step",
         [
-            ((5,), dict(), 0, 5, 1),
-            ((1, 5), dict(), 1, 5, 1),
-            ((1, 5, 2), dict(), 1, 5, 2),
-            ((0,), dict(), 0, 0, 1),
-            ((0, 0), dict(), 0, 0, 1),
-            (tuple(), dict(start=0), 0, 0, 1),
-            (tuple(), dict(stop=0), 0, 0, 1),
+            ((5,), {}, 0, 5, 1),
+            ((1, 5), {}, 1, 5, 1),
+            ((1, 5, 2), {}, 1, 5, 2),
+            ((0,), {}, 0, 0, 1),
+            ((0, 0), {}, 0, 0, 1),
+            ((), {"start": 0}, 0, 0, 1),
+            ((), {"stop": 0}, 0, 0, 1),
         ],
     )
     def test_constructor(self, args, kwargs, start, stop, step, name):
@@ -43,7 +43,7 @@ class TestRangeIndexConstructors:
             r"kind, 0 was passed"
         )
         with pytest.raises(TypeError, match=msg):
-            Index(0, 1000)
+            Index(0)
 
     @pytest.mark.parametrize(
         "args",
@@ -114,11 +114,6 @@ class TestRangeIndexConstructors:
         expected = RangeIndex(1, 5, 2)
         tm.assert_index_equal(result, expected, exact=True)
 
-        with pytest.raises(
-            ValueError,
-            match="Incorrect `dtype` passed: expected signed integer, received float64",
-        ):
-            Index(range(1, 5, 2), dtype="float64")
         msg = r"^from_range\(\) got an unexpected keyword argument"
         with pytest.raises(TypeError, match=msg):
             RangeIndex.from_range(range(10), copy=True)
@@ -149,9 +144,9 @@ class TestRangeIndexConstructors:
         tm.assert_index_equal(index, Index(arr))
 
         # non-int raise Exception
-        with pytest.raises(TypeError):
+        with pytest.raises(TypeError, match=r"Wrong type \<class 'str'\>"):
             RangeIndex("1", "10", "1")
-        with pytest.raises(TypeError):
+        with pytest.raises(TypeError, match=r"Wrong type \<class 'float'\>"):
             RangeIndex(1.1, 10.2, 1.3)
 
         # invalid passed type

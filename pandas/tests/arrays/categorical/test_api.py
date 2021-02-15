@@ -371,7 +371,10 @@ class TestCategoricalAPI:
         tm.assert_index_equal(res.categories, exp_categories_dropped)
         tm.assert_index_equal(c.categories, exp_categories_all)
 
-        res = c.remove_unused_categories(inplace=True)
+        with tm.assert_produces_warning(FutureWarning):
+            # issue #37643 inplace kwarg deprecated
+            res = c.remove_unused_categories(inplace=True)
+
         tm.assert_index_equal(c.categories, exp_categories_dropped)
         assert res is None
 
@@ -464,7 +467,7 @@ class TestPrivateCategoricalAPI:
         tm.assert_numpy_array_equal(c.codes, exp)
 
         # Assignments to codes should raise
-        with pytest.raises(ValueError, match="cannot set Categorical codes directly"):
+        with pytest.raises(AttributeError, match="can't set attribute"):
             c.codes = np.array([0, 1, 2, 0, 1], dtype="int8")
 
         # changes in the codes array should raise
